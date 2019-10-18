@@ -1,0 +1,164 @@
+﻿@model KoiosZadatak.Models.NaseljeViewModel
+
+@{
+    ViewData["Title"] = "Naselja";
+    //var drzave = ViewData["Drzave"] as IEnumerable<Drzava>;
+}
+
+<div>
+    <input type="hidden" id="hidNaseljeId" value="-1" />
+    Naselje: <input class="form-control" type="text" id="txtNaziv" /><br />
+    Poštanski broj: <input class="form-control" type="text" id="txtPostBroj" /><br />
+    Država: <select asp-items="@(new SelectList(Model.Drzave,"Id","Naziv"))" class="form-control" id="ddlDrzave">
+    
+<option>---Odaberite---</option>
+</select> <br /><input type="hidden" id="hidDrzavaId" value="-1" />
+    <button class="btn btn-primary" id="btnDrzavaUpdate" onclick="UnosNaselja()">Potvrdi</button>
+</div>
+<br />
+<h2>Popis naselja</h2>
+
+
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th></th>
+            <th>
+                Poštanski broj
+            </th>
+            <th>
+                Naziv naselja
+            </th>
+            <th>
+                Država
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Naselja)
+        {
+        <tr id="@item.Id">
+            <td><button id="btnEdit" class="btn btn-secondary" onclick="GetNaselje('@item.Id')">Edit</button> </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PostanskiBroj)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Naziv)
+            </td>
+            <td>
+                @item.Drzava.Naziv
+            </td>
+            <td><button id="btnDelete" class="btn btn-secondary" onclick="DeleteNaselje('@item.Id')">Delete</button> </td>
+        </tr>
+        }
+    </tbody>
+</table>
+<script type="text/javascript">
+    function UnosNaselja() {
+        var naseljeId = parseInt($("#hidNaseljeId").val());
+        var naziv = $("#txtNaziv").val();
+        var pbr = $("#txtPostBroj").val();
+        var drzavaId = parseInt($("#ddlDrzave").val());
+        var naselje = new Object();
+        naselje.Id = naseljeId;
+        naselje.Naziv = naziv;
+        naselje.DrzavaId = drzavaId;
+        naselje.PostanskiBroj = pbr;
+        if (naseljeId == -1) {
+            naselje.Naziv = naziv;
+            naselje.PostanskiBroj = pbr;
+            naselje.Id = 0;
+            PostNaselje(naselje);
+        } else {
+            
+        }
+
+
+    }
+    function PostNaselje(naselje) {
+        var naselje1 = { Naziv: naselje.Naziv, DrzavaId: naselje.DrzavaId, PostanskiBroj: naselje.PostanskiBroj, Id: 0 };
+        $.ajax({
+            url: "/api/naselje",
+            method: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            //data: {naziv: naselje.Naziv, drzavaId: naselje.DrzavaId, pbr: naselje.PostanskiBroj },
+            data: naselje1,
+            success: function (data) {
+                alert(data);
+            },
+            error: function () {
+                alert("Ajax call failed");
+            }
+        });
+
+        //$.ajax({
+        //    url: "/api/drzava/UnesiDrzavu",
+        //    method: "POST",
+        //    //contentType: "application/json; charset=utf-8",
+        //    dataType: "json",
+        //    data: drzava,
+        //    success: function (data) {
+        //        alert(data);
+
+        //        //alert("Update uspio.");
+        //    },
+        //    error: function () {
+        //        //alert("Ajax call failed");
+        //    }
+        //});
+    }
+    function PutDrzava(naselje) {
+        $.ajax({
+            url: "/api/naselje/" + naselje.Id,
+            type: 'PUT',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: drzava,
+            success: function (data) {
+                alert(data);
+
+                //alert("Update uspio.");
+            },
+            error: function () {
+                //alert("Ajax call failed");
+            }
+        });
+    }
+    function GetNaselje(val) {
+        $.ajax({
+            url: "/api/naselje/" + val,
+            method: "GET",
+            data: { id: val },
+            success: function (data) {
+                var id = data.id;
+                var naziv = data.naziv;
+                var pbr = data.postanskiBroj;
+                $("#hidNaseljeId").val(id);
+                $("#txtNaziv").val(naziv);
+                $("#txtPostBroj").val(pbr);
+                $("#ddlDrzave").val(data.drzavaId);
+                $("#ddlDrzave").attr('selected', 'selected');
+            },
+            error: function () {
+                alert("Ajax call failed");
+            }
+        });
+    }
+    function DeleteNaselje(val) {
+        $.ajax({
+            url: "/api/naselje/" + val,
+            method: "DELETE",
+            data: { id: val },
+            success: function (data) {
+                //alert(data.id);
+                $("#" + data.id).remove();
+                
+            },
+            error: function () {
+                alert("Ajax call failed");
+            }
+        });
+    }
+</script>

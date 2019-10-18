@@ -1,0 +1,132 @@
+﻿@model IEnumerable<KoiosZadatak.Models.Drzava>
+
+@{
+    ViewData["Title"] = "Drzave";
+}
+
+<h1>Drzave</h1>
+
+<div>
+    <input type="hidden" id="hidDrzavaId" value="-1" />
+    Naziv države: <input class="form-control" type="text" id="txtNaziv" /><br />
+    <button class="btn btn-primary" id="btnDrzavaUpdate" onclick="UnosDrzave()"  >Potvrdi</button>
+</div>
+<br />
+<h2>Popis država</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>
+                @Html.DisplayNameFor(model => model.Naziv)
+            </th>
+            <th></th>
+            
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td><button class="btn btn-secondary" id="btnGetDrzava" onclick="GetDrzava('@item.Id')">Edit</button></td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Naziv)
+            </td>
+            <td>
+                <button class="btn btn-secondary" id="btnGetDrzava" onclick="DeleteDrzava('@item.Id')">Delete</button>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+<script type="text/javascript">
+    function UnosDrzave() {
+        var drzavaId = parseInt($("#hidDrzavaId").val());
+        var naziv = $("#txtNaziv").val();
+        var akcija = "";
+        var metoda = "";
+        var drzava = new Object();
+        drzava.Id = drzavaId;
+        drzava.Naziv = naziv;
+        if (drzavaId == -1) {
+            akcija = "/api/drzava/";
+            metoda = "POST";
+            drzava.Id = 0;
+            //alert(akcija + "-" + metoda);
+            PostDrzava(drzava);
+        } else {
+            akcija = "/api/drzava/" ;
+            metoda = "PUT";
+            alert(akcija + "-" + metoda);
+            PutDrzava(drzava);
+        }
+       
+        var val = { id: drzavaId, naziv: naziv };
+        //alert(val);
+        
+    }
+    function PostDrzava(drzava) {
+        var drzava1 = { Id:0, Naziv: 'hctest' };
+        $.ajax({
+            url: "/api/drzava",
+            method: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: drzava1,
+            success: function (res) {
+                alert(res);
+            },
+            error: function () {
+                alert("Ajax call failed");
+            }
+        });
+
+        //$.ajax({
+        //    url: "/api/drzava/UnesiDrzavu",
+        //    method: "POST",
+        //    //contentType: "application/json; charset=utf-8",
+        //    dataType: "json",
+        //    data: drzava,
+        //    success: function (data) {
+        //        alert(data);
+
+        //        //alert("Update uspio.");
+        //    },
+        //    error: function () {
+        //        //alert("Ajax call failed");
+        //    }
+        //});
+    }
+    function PutDrzava(drzava) {
+        $.ajax({
+            url: "/api/drzava/" + drzava.Id,
+            type: 'PUT',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: drzava,
+            success: function (data) {
+                alert(data);
+
+                //alert("Update uspio.");
+            },
+            error: function () {
+                //alert("Ajax call failed");
+            }
+        });
+    }
+    function GetDrzava(val) {
+        $.ajax({
+            url: "/api/drzava/" + val,
+            method: "GET",
+            data: { id: val },
+            success: function (data) {
+                $("#hidDrzavaId").val(data.id);
+                $("#txtNaziv").val(data.naziv);
+                
+                
+            },
+            error: function () {
+                alert("Ajax call failed");
+            }
+        });
+    }
+</script>
